@@ -33,7 +33,6 @@ jobs:
 #          DB_USERNAME: ${{ secrets.DB_USERNAME }}
 #          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
-
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/test_image:latest .
@@ -47,7 +46,7 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/test_image:latest
 
-      - name: Deploy to EC2 via SSH
+      - name: Set environment variables on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -59,10 +58,28 @@ jobs:
             echo "ORACLE_URL=${{ secrets.ORACLE_URL }}" > .env
             echo "ORACLE_USERNAME=${{ secrets.ORACLE_USERNAME }}" >> .env
             echo "ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }}" >> .env
-            
+
+      - name: Pull Docker image and restart container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd ~/spring
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/test_image:latest
             sudo docker compose down
-            sudo docker compose up -d
+            sudo docker compose up -d  
+            
+      - name: Remove dangling Docker images
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "Removing dangling images..."
+            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
 
 #            echo "MYSQL_URL=${{ secrets.MYSQL_URL }}" > .env
 #            echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
