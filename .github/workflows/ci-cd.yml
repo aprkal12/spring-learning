@@ -25,9 +25,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
         env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#          DB_URL: ${{ secrets.DB_URL }}
+#          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+#          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ORACLE_URL: ${{ secrets.ORACLE_URL }}
+          ORACLE_USERNAME: ${{ secrets.ORACLE_USERNAME }}
+          ORACLE_PASSWORD: ${{ secrets.ORACLE_PASSWORD }}
 
       - name: Build Docker image
         run: |
@@ -50,10 +53,13 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/spring
-            
-            echo "DB_URL=${{ secrets.DB_URL }}" > .env
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+                    
+            echo "ORACLE_URL=${{ secrets.ORACLE_DB_URL }}" > .env
+            echo "ORACLE_USERNAME=${{ secrets.ORACLE_DB_USERNAME }}" >> .env
+            echo "ORACLE_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}" >> .env
+#            echo "MYSQL_URL=${{ secrets.MYSQL_URL }}" > .env
+#            echo "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
+#            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
       
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/test_image:latest
             sudo docker compose down
