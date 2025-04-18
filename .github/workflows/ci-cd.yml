@@ -3,7 +3,7 @@ name: CI/CD with Docker and EC2
 on:
   push:
     branches:
-      - main  # 또는 master 등, 배포할 브랜치 이름
+      - main  
 
 jobs:
   build-and-deploy:
